@@ -1,0 +1,7 @@
+dictshield==0.2.1
+pymongo==1.10
+python-dateutil==1.5
+simplejson==2.1.5
+networkx==1.4
+numpy==1.5.1
+
