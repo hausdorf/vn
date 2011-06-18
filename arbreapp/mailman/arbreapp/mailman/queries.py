@@ -8,7 +8,7 @@ from arbre.database import init_apply_all_indexes, gen_date_args
 ###
 
 EMAIL_COLL = 'emails'
-EDGESS_COLL = 'communications'
+EDGES_COLL = 'edges'
 
 
 ###
@@ -153,7 +153,7 @@ def update_ldc_pair(db, msg_id, ldc, ldcknn):
 ### Edge Queries
 ###
 
-def find_edgess(db, **kwargs):
+def find_edges(db, **kwargs):
     """Accepts any keywords that `_find_by_common` accepts and simply calls
     `_find_by_common` with the communications collection.
     """
