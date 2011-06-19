@@ -260,6 +260,11 @@ def get_attributed_graph(db, vertices=None,
     for vertex,attributes in vertex_attributes.items():
         if vertex in G.nodes():
             G.add_node(vertex,**attributes)
+            """
+            This could be accomplished by G.node[vertex]={keys,vals}, but this
+            counterintuitive way actually compounds attributes instead of
+            replacing them.
+            """
     return G
                 
         
