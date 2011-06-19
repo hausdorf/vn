@@ -6,8 +6,8 @@ import pymongo
 ###
 ### Collection Config
 ###
-EMPLOYEES_COLL = 'employees'
-EMPLOYEE_MEASURES_COLL = 'employee_measures'
+VERTEX_COLL = 'employees'
+VERTEX_MEASURES_COLL = 'employee_measures'
 
 
 ###
@@ -16,7 +16,7 @@ EMPLOYEE_MEASURES_COLL = 'employee_measures'
 
 indexes = {
     ## Indexes for the email collection
-    EMPLOYEES_COLL: [
+    VERTEX_COLL: [
         [('source', pymongo.ASCENDING),
          ('email_name', pymongo.ASCENDING)],
         
@@ -25,7 +25,7 @@ indexes = {
     ],
 
     ## Indexes for communications collection
-    EMPLOYEE_MEASURES_COLL: [
+    VERTEX_MEASURES_COLL: [
         [('source', pymongo.ASCENDING),
          ('employee_id', pymongo.ASCENDING),
          ('name', pymongo.ASCENDING)],
@@ -50,7 +50,7 @@ def find_employees(db, source=None, email_name=None, full_name=None,
     query_dict = dict();
 
     # run query and apply paging 
-    db_cursor = db[EMPLOYEES_COLL].find(query_dict)
+    db_cursor = db[VERTEX_COLL].find(query_dict)
     db_cursor.limit(count) # limit(0) = no limit
     db_cursor.skip(page * count)
     
@@ -59,7 +59,7 @@ def find_employees(db, source=None, email_name=None, full_name=None,
 def insert_employee(db, employee):
     """Comments.
     """
-    employee_id = db[EMPLOYEES_COLL].insert(employee.to_python())
+    employee_id = db[VERTEX_COLL].insert(employee.to_python())
     employee.id = employee_id
     apply_all_indexes(db, EMPLOYEES_COLL)
     
@@ -80,5 +80,5 @@ def find_employee_measures(db, **kwargs):
 def insert_employee_measure(db, email):
     """Comment.
     """
-    #apply_all_indexes(db, EMPLOYEE_MEASURES_COLL)
+    #apply_all_indexes(db, VERTEX_MEASURES_COLL)
     pass
