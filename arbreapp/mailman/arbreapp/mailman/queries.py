@@ -210,8 +210,13 @@ def get_attributed_graph(db, vertices=None,
 
     vertex_attributes = {}
     if v_attributes:
-        print "Have not yet implemented querying for vertex attributes"
-
+        employees = find_employees(db,count=0)
+        for employee in employees:
+            this_vertex_attr = {}
+            for v_attr in v_attributes:
+                if v_attr in employee:
+                    this_vertex_attr[v_attr] = employee[v_attr]
+            vertex_attributes[employee] = this_vertex_attr
 
     #First, build the edgelist
     edgelist = {} #keyed by ao(v1,v2)
@@ -251,6 +256,10 @@ def get_attributed_graph(db, vertices=None,
     #Turn the edgelist into an attributed networkx graph
     G = nx.Graph().add_edges_from( edgelist )
 
+    #Add vertex attributes if they exist
+    for vertex,attributes in vertex_attributes.items():
+        if vertex in G.nodes():
+            G.add_node(vertex,**attributes)
     return G
                 
         
