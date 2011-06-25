@@ -43,7 +43,6 @@ def maildir_to_mongo(db, maildir):
     """Shorthand for recursively calling `mailfile_to_mongo` on each mailfile in
     a directory.
     """
-    print 'THIS ONE'
     def email_path_handler(email_path):
         mailfile_to_mongo(db, maildir, email_path)
     maildir_process_dir(email_path_handler, root_dir=maildir)
