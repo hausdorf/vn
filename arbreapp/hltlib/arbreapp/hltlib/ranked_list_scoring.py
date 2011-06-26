@@ -153,6 +153,34 @@ def score_ranked_list( ranked_list, correct_answers, relevance_measures=None, le
         return [min_rank, correct_first, correct_second, average_precision, ndcg]
 
 
+def empirical_chance_performance( candidates, correct_answers, relevance_measures=None,
+                                  R=1000, return_mean_only=False):
+    """ Empirically determine chance performance for each of the measures.
+    `candidates` is a set of objects (generally strings) which are to be scored.
+    `correct_answers` are the correct answers within that set of candidates.
+    `relevance_measures` is an optional dictionary of relevance judgements for the set
+    of correct answers, this is a dictionary where the key is the candidate name and the
+    value is a float or integer value. Higher is better or 'more relevant'.
+    `R` is the number of random orderings of the candidates to score.
+    By default, this returns a distribution of the scores, but if
+    `return_mean_only`=True only the mean of the scores will be returned.
+    """
+    scores = []
+    candidate_list = list(candidates)
+    import random
+    for r in range(R):
+        random.shuffle(candidate_list)
+        scores.append(score_ranked_list( candidate_list, correct_answers,
+                                         relevance_measures=relevance_measures))
+    if return_mean_only:
+        means = []
+        for i in range(len(scores[0])):
+            means.append( sum( [ x[i] for x in scores ] ) / len(scores) )
+        return means
+    return scores
+    
+                     
+    
 if __name__ == "__main__": #Call standalone for test
     a = [1,2,3,4,5,6,7,8,9]
 
@@ -178,5 +206,17 @@ if __name__ == "__main__": #Call standalone for test
     print score_ranked_list( a, correct_answers)
     print score_ranked_list( a, correct_answers, relevance_measures)
 
-    
+    a = range(1000)
+    cor = range(100)
+    relevance_measures = {}
+    for c in cor:
+        relevance_measures[c] = c / 10
+        
+    raw_scores = empirical_chance_performance( a, cor, relevance_measures=relevance_measures)
+    print "Raw scores:", len(raw_scores), "---[-1]:", raw_scores[-1]
+
+    means = empirical_chance_performance( a, cor,
+                                           relevance_measures=relevance_measures,
+                                           return_mean_only=True)
+    print "Means:", means
 
