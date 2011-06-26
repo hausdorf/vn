@@ -1,4 +1,5 @@
 import logging
+import time
 
 
 ###
@@ -27,6 +28,7 @@ def log_call(method):
         now = time.time()
         logging.debug('%s called at %s' % (method.__name__, time.time()))
         return method(*a, **kw)
+    return wrapper
 
     
 def log_runtime(method):

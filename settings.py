@@ -2,6 +2,9 @@
 ### Default settings
 ###
 
+### Path to logging output, if used
+log_file = './arbre.log'
+
 ### Path to the root directory of the raw emails
 maildir = "/export/projects/tto6/EnronSimulations/maildir"
 
