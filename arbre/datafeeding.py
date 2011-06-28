@@ -5,6 +5,7 @@ common interactions with filesystems, json feeds, web feeds, etc.
 import os
 import fnmatch
 import simplejson as json
+import copy
 
 
 ###
@@ -64,7 +65,7 @@ The conversion map is intended for use with `convert_keys`.
 """
 GARBAGE_KEY = '__garbage__'
 
-def convert_keys(data_dict, alternate_key_map, conversion_map, deepcopy=False):
+def convert_keys(data_dict, alternate_key_map, deepcopy=False):
     """Convert keys takes a python dictionary, representing a lucene document,
     and creates a new document with the keys mapped to their maildir equivalent.
     Uses `obcene_key_map` for the mapping. If a mapping isn't present, it
@@ -78,8 +79,8 @@ def convert_keys(data_dict, alternate_key_map, conversion_map, deepcopy=False):
         data_dict = copy.copy(data_dict) # don't mutate the input
         
     for key, value in data_dict.items():
-        if key in conversion_map:
-            new_key = conversion_map[key]
+        if key in alternate_key_map:
+            new_key = alternate_key_map[key]
             # handle unicode representations of < and >
             # TODO investigate if more work is necessary here
             value = value.replace('\u003c', '<')
