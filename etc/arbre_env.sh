@@ -29,7 +29,7 @@ arbreapp () {
 
     if [ "$app_name" = "" ]
     then
-        \ls -l "$ARBRE_DIR/arbreapp" | \grep "^d" | cut -d":" -f 2 | cut -d" " -f 2
+        \ls -l "$ARBRE_DIR/arbreapp" | \grep "^d" | \cut -d":" -f 2 | \cut -d" " -f 2
     elif [ -d "$app_path" ]
     then
         \cd $app_path

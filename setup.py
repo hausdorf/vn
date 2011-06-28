@@ -3,15 +3,28 @@
 
 from distutils.core import setup
 import os
+import fnmatch
 
 
 ###
-### Basic settings for install
+### Settings
 ###
 
 app_version = '0.5'
-apps = ['hltlib', 'mailman', 'rolodex']
-top_level_dir = os.getcwd()
+
+apps_dir = os.path.abspath('./arbreapp')
+
+
+###
+### Enumerate Packages
+###
+
+packages = ['arbre', 'arbreapp']
+
+for app_name in os.listdir(apps_dir):
+    app_path = os.path.join(apps_dir, app_name)
+    if os.path.isdir(app_path):
+        packages.append('arbreapp.' + app_name)
 
 
 ###
@@ -23,20 +36,4 @@ setup(name='arbre',
       description='Python Library for managing communication/authorship datasets',
       author='James Dennis',
       author_email='jdennis@gmail.com',
-      packages=['arbre', 'arbreapp'])
-
-
-###
-### Install Apps
-###
-
-for app in apps:
-    os.chdir(top_level_dir + '/arbreapp/' + app)
-    setup(name=app,
-          version=app_version,
-          author='James Dennis',
-          author_email='jdennis@gmail.com',
-          packages=['arbreapp.'+app],
-          namespace_packages=['arbreapp'])
-
-os.chdir(top_level_dir)
+      packages=packages)

@@ -3,7 +3,8 @@ from arbre.timestamping import MillisecondField
 from dictshield.document import Document
 from dictshield.fields import (StringField,
                                ObjectIdField,
-                               IntField)
+                               IntField,
+                               EmailField)
 
 
 ###
