@@ -47,8 +47,9 @@ arbresetapppaths() {
 
 ### Initializes the environment for Arbre
 arbreactivate() {
-    ### Figure out the path to Arbre based on where this file `arbre_env.sh` lives
-    export ARBRE_ENV_PATH=$(dirname $ARBRE_ENV_SCRIPT)
+    ### Figure out the absolute path to Arbre based on where this file 
+    ### `arbre_env.sh` lives
+    export ARBRE_ENV_PATH=$(cd $(dirname $ARBRE_ENV_SCRIPT); pwd) # total hack :)
 
     ### Set project directory path
     export ARBRE_DIR=$(dirname $ARBRE_ENV_PATH)
@@ -64,8 +65,33 @@ arbreactivate() {
 }
 
 ### Returns PYTHONPATH to normal value
-arbredeactivate () {
+arbredeactivate() {
     export PYTHONPATH=$PREV_PYTHONPATH
+}
+
+### Constructs the necessary and generic components of an Arbre app
+arbremkapp() {
+    typeset app_name="$1"
+    echo $app_name
+    typeset app_dir="$ARBRE_APP_PATH/$app_name/arbreapp/$app_name"
+    echo $app_dir
+
+    if [ "$app_name" = "" ]
+    then
+        echo "Pass <name> argument to name app"
+    else
+        # Instantiate the necessary directory path
+        \mkdir -p "$app_dir"
+
+        # Copy the namespace sharing __init__
+        # http://docs.python.org/library/pkgutil.html#pkgutil.extend_path
+        \cp "$ARBRE_ENV_PATH/skel/appfiles/__init__.py" "$ARBRE_DIR/arbreapp/$app_name/"
+
+        # Touch the other necessary __init__'s
+        \touch "$ARBRE_DIR/arbreapp/$app_name/__init__.py"
+        \touch "$ARBRE_DIR/arbreapp/$app_name/arbreapp/__init__.py"
+        \touch "$ARBRE_DIR/arbreapp/$app_name/arbreapp/$app_name/__init__.py"
+    fi
 }
 
 
