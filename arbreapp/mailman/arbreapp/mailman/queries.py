@@ -4,7 +4,7 @@ import copy
 
 from arbre.database import init_apply_all_indexes, gen_date_args
 from arbre.graphs import prepare_edgelist_for_nx
-from arbre.hltlib.constants import ao
+from arbreapp.hltlib.constants import ao
 
 ###
 ### Collection Config
