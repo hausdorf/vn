@@ -11,7 +11,10 @@ import codecs
 import simplejson as json
 import copy
 
-from arbre.datafeeding import locate_by_pattern, convert_keys, GARBAGE_KEY
+from arbre.datafeeding import (locate_by_pattern,
+                               process_json_feed,
+                               convert_keys,
+                               GARBAGE_KEY)
 
 from models import MaildirEmail, LuceneEmail
 from queries import insert_email, update_ldc_pair
