@@ -1,0 +1,235 @@
+<html>
+  <head>
+    <title>Arbre</title>
+    <link rel=stylesheet type=text/css href="media/style.css"> 
+    <link rel=stylesheet type=text/css href="media/prettify.css"> 
+    <script type="text/javascript" src="js/prettify.js"></script>
+  </head>
+
+  <body onload="prettyPrint()">
+    <h1 class="title">Arbre</h1>
+    <h4 class="title">...a lab framework</h4>
+    <h5 class="title">by HLTCOE!</h5>
+
+    <p class="links"><a href="readme.html">README</a> // <a href="install.html">INSTALL</a> // <a href="virtualenv.html">VIRTUALENV</a></p>
+
+<h1>Arbre</h1>
+
+<p>Arbre is a project for JHU HLTCOE's SCALE project. It initially started out as
+a mail database, but is growing into a project that stores relationships of many 
+forms. </p>
+
+<p>The project currently contains multiple parts:</p>
+
+<ul>
+<li>arbre</li>
+<li>the environment</li>
+<li>apps: mailman, rolodex, hltlib</li>
+<li>obcene</li>
+<li>command line tools</li>
+</ul>
+
+<h2>Arbre Module</h2>
+
+<p>Arbre itself is framework that provides a lot of wiring for working with data
+and building experiments. The functionality is contained in the <code>arbre</code> module
+itself.</p>
+
+<p>Logic that is generic and/or shareable exists in the <code>arbre</code> module. We 
+currently provide: </p>
+
+<ul>
+<li><em>database.py</em>: Generic database handling</li>
+<li><em>datafeeding.py</em>: Functions commonly useful to consuming / generating feeds</li>
+<li><em>graphs.py</em>: Functions useful for handling <code>networkx</code> graphs</li>
+<li><em>models.py</em>: Common shapes of data. Subclass these for compatibility.</li>
+<li><em>timestamping.py</em>: Functions for simple date handling</li>
+</ul>
+
+<h2>The Environment</h2>
+
+<p>Before you start working with Arbre, you should source the environment file.
+That looks like this:</p>
+
+<pre><code class="prettyprint">source /path/to/project/etc/arbre_env.sh
+</code></pre>
+
+<p>That prepares your environment with the <code>PYTHONPATH</code> and provides some helpful
+shell functions for developing with Arbre.</p>
+
+<p>To change your directory to the Arbre source directory, type <code>arbre</code></p>
+
+<pre><code class="prettyprint">jd@gibson : 19:03:59 : ~
+$ arbre
+
+jd@gibson : 19:04:01 : ~/Projects/arbre
+$
+</code></pre>
+
+<p>To list the currently available apps, type <code>arbreapp</code> with no arguments</p>
+
+<pre><code class="prettyprint">jd@gibson : 19:04:01 : ~/Projects/arbre
+$ arbreapp
+hltlib
+mailman
+rolodex
+</code></pre>
+
+<p>To navigate to an app's source directory, type <code>arbreapp &lt;appname&gt;</code>.</p>
+
+<pre><code class="prettyprint">jd@gibson : 19:04:06 : ~/Projects/arbre
+$ arbreapp rolodex
+
+jd@gibson : 19:04:09 : ~/Projects/arbre/arbreapp/rolodex
+$
+</code></pre>
+
+<p>To create a new app, type <code>arbremkapp &lt;appname&gt;</code></p>
+
+<pre><code class="prettyprint">jd@gibson : 19:06:45 : ~/Projects/arbre
+$ arbremkapp newapp
+Creating `newapp` app in /Users/jd/Projects/arbre/arbreapp
+
+jd@gibson : 19:06:48 : ~/Projects/arbre
+$ arbreapp
+hltlib
+mailman
+newapp
+rolodex
+
+jd@gibson : 19:06:54 : ~/Projects/arbre
+$ arbreapp newapp
+
+jd@gibson : 19:06:56 : ~/Projects/arbre/arbreapp/newapp
+$ ls
+__init__.py  models.py    newapp.py    queries.py
+</code></pre>
+
+<h2>Apps</h2>
+
+<p>Arbre comes with a few apps, visible in the <code>arbreapp</code> directory. Each app
+contains logic for handling less generic data, like Emails or People.</p>
+
+<p>The basic idea is that we store the shapes of data in <code>models.py</code> and the 
+queries used for retrieving data from mongo in <code>queries.py</code>. If the data is
+generic enough, we'd like to represent it in <code>arbre</code> with everything else
+stored in an app.</p>
+
+<h2>Mailman</h2>
+
+<p>Mailman is a Python module for mapping email structures into ScaleDB. It 
+consists of the model design: <code>models.py</code>, the email handling code: 
+<code>mailman.py</code>, and the query designs: <code>queries.py</code>.</p>
+
+<h3>Email Models</h3>
+
+<p>The data shapes are modeled in <code>models.py</code> using
+<a href="https://github.com/j2labs/dictshield">DictShield</a>.</p>
+
+<p>A simplified form of the email model looks like this:</p>
+
+<pre><code class="prettyprint">class Email(Document):
+    source = StringField(required=True, default='Email')
+    folder = StringField()
+    date = MillisecondField(required=True, default=0)
+    subject = StringField()
+    to = StringField()
+    ffrom = EmailField() # from is a keyword
+    cc = StringField()
+    bcc = StringField()
+    body = StringField()
+</code></pre>
+
+<h3>Email Handling</h3>
+
+<p><code>mailmail.py</code> offers three general types of functions. Functions handling:</p>
+
+<ul>
+<li>Reading emails from a file system</li>
+<li>Processing a list of JSON documents representing emails</li>
+<li>Basic facilities for reading meta data from email headers</li>
+</ul>
+
+<h3>Query Designs</h3>
+
+<p>ScaleDB uses MongoDB. MongoDB offers much to like in terms of speed and 
+flexibility. The queries offer excellent performance if index structures are
+maintained and queries are designed to always have an associated index.</p>
+
+<p>The logic for this is stored in <code>queries.py</code>.</p>
+
+<h2>Obcene</h2>
+
+<p>Obcene is Java code for reading a lucene index file. It iterates over every 
+Document in the index and uses Google's GSON library to write the object as JSON
+to a file.</p>
+
+<p>The lucene index path used here: 
+/home/hltcoe/bvandurme/Enron/FromDoug/umdex_v3.00/collection/index/enron-duplicate-free/</p>
+
+<h3>Using It</h3>
+
+<p>Using it looks like this.</p>
+
+<pre><code class="prettyprint">$ cd arbre/obcene
+$ source ./classpath.sh
+$ ./compile.sh 
+... might print warnings, my java is rusty ...
+$ ./run.sh /path/to/lucene/index &gt; email_list.json
+</code></pre>
+
+<h2>Command Line Tools</h2>
+
+<p>The command line tools are kept in the <code>bin/</code> directory. At the time of this 
+writing there are four scripts: <code>hc_lucene.py</code>, <code>hc_maildir.py</code>, 
+<code>import_lucene.py</code> and <code>import_maildir.py</code>. </p>
+
+<p>The hc_* scripts will read a data source and do a header count. This has been 
+useful for determining, somewhat comprehensively, how to model the emails.</p>
+
+<p>The import_* scripts know how to read data created from some source. They 
+generate two types of Python models, <code>MaildirEmail</code> and <code>LuceneEmail</code>. The 
+<code>import_maildir.py</code> script reads a path from settings.py and iterates it's way
+through the directory recursively creating a <code>MaildirEmail</code> instance for each 
+one. The <code>import_lucene.py</code> script iterates of a list of JSON documents.</p>
+
+<p>The list of JSON documents for a lucene import comes from using Obcene.</p>
+
+<p>Both import scripts map the import data into <code>DictShield</code> documents. The 
+document is initially modeled after the <code>MaildirEmail</code>. The lucene import script
+makes use of conversion functions to map it's format into a structure similar to 
+<code>MaildirEmail</code> by renaming fields. </p>
+
+<p>Both emails have roughly the same fields so actual changes were minimal. Common
+fields are modeled in <code>Email</code>.</p>
+
+<h3>Using Them</h3>
+
+<p>This is what using it looks like:</p>
+
+<pre><code class="prettyprint">jd@gibson : 12:41:58 : ~/Projects/arbre
+$ source ./etc/arbre_env.sh # ensures python path includes cwd
+
+jd@gibson : 12:42:07 : ~/Projects/arbre
+$ workon arbre # turn on virtual environment
+
+(arbre)
+jd@gibson : 12:42:10 : ~/Projects/arbre
+$ ./bin/hc_lucene.py 
+{'ccAddress': 6, 'ea-from': 22, 'quoted': 76, 'cc': 6, 'sal-line': 1, '---': 76, 'bccName': 6, 'bccAddress': 6, 'fromAddress': 100, 'contents': 100, 'subject': 100, 'contents-lines': 100, 'x-cc': 16, 'from': 19, 'fromName': 100, 'unstemmed-contents': 100, 'num-quoted': 100, 'to': 14, 'ccName': 6, 'folder': 100, 'inReplyTo': 100, 'ea-to': 1, 'quoted-lines': 76, 'sig-block-lines': 7, 'messageID': 100, 'date': 100, 'x-to': 74, 'toName': 100, 'toAddress': 100, 'x-list-from': 1, 'sig-block': 7, 'quote-type': 76, 'length': 100, 'sal-line-lines': 1, 'x-from': 46}
+
+(arbre)
+jd@gibson : 12:42:13 : ~/Projects/arbre
+$ ./bin/import_lucene.py 
+
+(arbre)
+jd@gibson : 12:44:17 : ~/Projects/arbre
+$ ./bin/import_ldcfile.py
+
+(arbre)
+jd@gibson : 12:46:27 : ~/Projects/arbre
+$
+</code></pre>
+
+  </body>
+</html>
