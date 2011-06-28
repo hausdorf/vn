@@ -13,21 +13,12 @@ import copy
 
 from models import MaildirEmail, LuceneEmail
 from queries import insert_email, update_ldc_pair
+from filehandling import locate_by_pattern, convert_keys, GARBAGE_KEY
 
 
 ###
 ### Email Directory Walking Functions
 ###
-
-def locate_by_pattern(pattern, root_dir):
-    """This is a generator for recursively detecting files with names that
-    match the given pattern in a directory.
-
-    The root directory defaults to the current directory.
-    """
-    for path, dirs, files in os.walk(os.path.abspath(root_dir)):
-        for filename in fnmatch.filter(files, pattern):
-            yield os.path.join(path, filename)
 
 def maildir_process_dir(fun, root_dir='.', pattern='*.'):
     """Maps a function, `fun`, across all emails found in `root` and returns
@@ -97,21 +88,6 @@ def mailfile_to_message(email_path):
 
 ### Obcene Specific
 
-def obcene_process_feed(fun, filename):
-    """Loops across each line in `filename` and converts the data from JSON to
-    a Python dictionary.
-
-    It then calls `fun` which is a function provided by the caller, designed for
-    a Python dictionary, not JSON.
-
-    No return value is generated to avoid overhead, but `fun` can be a closure
-    for aggregating values.
-    """
-    fd = open(filename, 'r')
-    for line in fd:
-        data = json.loads(line)
-        fun(data)
-
 def obcene_header_count(filename):
     """This function takes the keys from line_dict, eg the email headers, and
     accumulates a count in keys_found.
@@ -123,7 +99,7 @@ def obcene_header_count(filename):
         for header in line_dict.keys():
             count_header_instances(header, keys_found)
             
-    obcene_process_feed(line_handler, filename)
+    process_json_feed(line_handler, filename)
     return keys_found
     
 def obcene_to_mongo(db, filename):
@@ -135,7 +111,7 @@ def obcene_to_mongo(db, filename):
         email_doc = LuceneEmail(**email_dict)
         insert_email(db, email_doc)
 
-    obcene_process_feed(line_handler, filename)
+    process_json_feed(line_handler, filename)
 
 
 ###
@@ -201,9 +177,6 @@ def process_ldc_file(db, ldc_file, delimiter='\t', dups_file=None):
 ### Key Conversion
 ###
 
-# This key should never map to a document field
-GARBAGE_KEY = '__garbage'
-
 obcene_key_map = {
     'toName': 'x_to',
     'inReplyTo': 're',
@@ -223,41 +196,12 @@ obcene_key_map = {
     # fields 
     '---': GARBAGE_KEY,
     'date': GARBAGE_KEY, # different format for same thing
-}    
-    
-def _convert_keys(email_dict, alternate_key_map, deepcopy=False):
-    """Convert keys takes a python dictionary, representing a lucene document,
-    and creates a new document with the keys mapped to their maildir equivalent.
-    Uses `obcene_key_map` for the mapping. If a mapping isn't present, it
-    leaves the in the map.
-
-    Deepcopy is supported, but off by default to favor speed.
-    """
-    if deepcopy:
-        email_dict = copy.deepcopy(email_dict)
-    else:
-        email_dict = copy.copy(email_dict) # don't mutate the input
-        
-    for key, value in email_dict.items():
-        if key in obcene_key_map:
-            new_key = obcene_key_map[key]
-            # handle unicode representations of < and >
-            # TODO investigate if more work is necessary here
-            value = value.replace('\u003c', '<')
-            value = value.replace('\u003e', '>')
-            email_dict[new_key] = value
-            del email_dict[key]
-            
-    # dictionary based garbage collection ;)
-    if GARBAGE_KEY in email_dict:
-        del email_dict[GARBAGE_KEY]
-
-    return email_dict
+}
 
 def obcene_convert_keys(email_dict, deepcopy=False):
     """Short hand for converting keys in a dictionary from obcene to maildir.
     """
-    return _convert_keys(email_dict, obcene_key_map, deepcopy=deepcopy)
+    return convert_keys(email_dict, obcene_key_map, deepcopy=deepcopy)
 
 
 ###
