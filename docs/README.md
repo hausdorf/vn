@@ -1,24 +1,105 @@
-# ScaleDB
+# Arbre
 
-ScaleDB is a project for JHU HLTCOE's SCALE project. It initially started out as
+Arbre is a project for JHU HLTCOE's SCALE project. It initially started out as
 a mail database, but is growing into a project that stores relationships of many 
 forms. 
 
-The name, ScaleDB, is also a working title and might change.
-
 The project currently contains multiple parts:
 
-* arbreapp.mailman
+* arbre
+* the environment
+* apps: mailman, rolodex, hltlib
 * obcene
 * command line tools
+
+## Arbre Module
+
+Arbre itself is framework that provides a lot of wiring for working with data
+and building experiments. The functionality is contained in the `arbre` module
+itself.
+
+Logic that is generic and/or shareable exists in the `arbre` module. We 
+currently provide: 
+
+* _database.py_: Generic database handling
+* _datafeeding.py_: Functions commonly useful to consuming / generating feeds
+* _graphs.py_: Functions useful for handling `networkx` graphs
+* _models.py_: Common shapes of data. Subclass these for compatibility.
+* _timestamping.py_: Functions for simple date handling
+
+
+## The Environment
+
+Before you start working with Arbre, you should source the environment file.
+That looks like this:
+
+    source /path/to/project/etc/arbre_env.sh
+
+That prepares your environment with the `PYTHONPATH` and provides some helpful
+shell functions for developing with Arbre.
+
+To change your directory to the Arbre source directory, type `arbre`
+
+    jd@gibson : 19:03:59 : ~
+    $ arbre
+
+    jd@gibson : 19:04:01 : ~/Projects/arbre
+    $ 
+    
+To list the currently available apps, type `arbreapp` with no arguments
+
+    jd@gibson : 19:04:01 : ~/Projects/arbre
+    $ arbreapp
+    hltlib
+    mailman
+    rolodex
+    
+To navigate to an app's source directory, type `arbreapp <appname>`.
+
+    jd@gibson : 19:04:06 : ~/Projects/arbre
+    $ arbreapp rolodex
+    
+    jd@gibson : 19:04:09 : ~/Projects/arbre/arbreapp/rolodex
+    $
+
+To create a new app, type `arbremkapp <appname>`
+
+    jd@gibson : 19:06:45 : ~/Projects/arbre
+    $ arbremkapp newapp
+    Creating `newapp` app in /Users/jd/Projects/arbre/arbreapp
+    
+    jd@gibson : 19:06:48 : ~/Projects/arbre
+    $ arbreapp
+    hltlib
+    mailman
+    newapp
+    rolodex
+    
+    jd@gibson : 19:06:54 : ~/Projects/arbre
+    $ arbreapp newapp
+    
+    jd@gibson : 19:06:56 : ~/Projects/arbre/arbreapp/newapp
+    $ ls
+    __init__.py  models.py    newapp.py    queries.py
+
+
+## Apps
+
+Arbre comes with a few apps, visible in the `arbreapp` directory. Each app
+contains logic for handling less generic data, like Emails or People.
+
+The basic idea is that we store the shapes of data in `models.py` and the 
+queries used for retrieving data from mongo in `queries.py`. If the data is
+generic enough, we'd like to represent it in `arbre` with everything else
+stored in an app.
 
 
 ## Mailman
 
 Mailman is a Python module for mapping email structures into ScaleDB. It 
 consists of the model design: `models.py`, the email handling code: 
-`arbreapp.mailman.py`, the query designs: `queries.py` and some functions for managing
-time keeping: `timestamping.py`.
+`mailman.py`, and the query designs: `queries.py`.
+
 
 ### Email Models
 
@@ -38,13 +119,15 @@ A simplified form of the email model looks like this:
         bcc = StringField()
         body = StringField()
 
+
 ### Email Handling
 
-mailmail.py offers three general types of functions. Functions handling:
+`mailmail.py` offers three general types of functions. Functions handling:
 
 * Reading emails from a file system
 * Processing a list of JSON documents representing emails
 * Basic facilities for reading meta data from email headers
+
 
 ### Query Designs
 
@@ -53,15 +136,6 @@ flexibility. The queries offer excellent performance if index structures are
 maintained and queries are designed to always have an associated index.
 
 The logic for this is stored in `queries.py`.
-
-### Time Keeping
-
-Time is stored as milliseconds. Dates, however, often come in all kinds of 
-crazy forms. `timestamping.py` contains functions that use the `dateutil` module
-for translations to and from milliseconds.
-
-`dateutil`'s parse function can accept *most* string representations of dates
-and date deltas and translate it into Python datetime's. 
 
 
 ## Obcene
@@ -108,6 +182,7 @@ makes use of conversion functions to map it's format into a structure similar to
 
 Both emails have roughly the same fields so actual changes were minimal. Common
 fields are modeled in `Email`.
+
 
 ### Using Them
 
