@@ -62,8 +62,10 @@ def _find_by_common(collection, fields=None, source=None, message_id=None,
 
         <24283319.1075842034234.JavaMail.evans@thyme>
 
-    `start_date` and `end_date` should be milliseconds since January 1, 1970.
-    Check the `timekeeping` module in arbreapp.mailman for functions that make this easy.
+    `start_date` and `end_date` are milliseconds since January 1, 1970. If a
+    string is provided for either, a conversion will take place. It can cover
+    just about whatever you throw at it, but read the documentation for
+    `gen_date_args` for more detail.
 
     The `count` flag defaults to 50, but you can set it to 0 to have no limit
     applied.
@@ -79,7 +81,8 @@ def _find_by_common(collection, fields=None, source=None, message_id=None,
     # Arrange fields to optimize index usage
     if source:
         query_dict['source'] = source
-    if message_id: query_dict['message_id'] = message_id
+    if message_id:
+        query_dict['message_id'] = message_id
 
     date_args = gen_date_args(start_date, end_date)
     if len(date_args.keys()) > 0:
@@ -88,7 +91,8 @@ def _find_by_common(collection, fields=None, source=None, message_id=None,
         }
 
     # Support less prominent indexes
-    if ffrom: query_dict['ffrom'] = ffrom
+    if ffrom:
+        query_dict['ffrom'] = ffrom
 
     # run query and apply paging 
     db_cursor = collection.find(query_dict)
@@ -161,6 +165,7 @@ def find_edges(db, **kwargs):
     `_find_by_common` with the communications collection.
     """
     return _find_by_common(db[EDGES_COLL], **kwargs)
+
 
 def find_communications(db, **kwargs):
     """Accepts any keywords that `_find_by_common` accepts and simply calls

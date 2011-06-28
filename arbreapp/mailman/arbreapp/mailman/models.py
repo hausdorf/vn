@@ -12,7 +12,6 @@ from arbre.models import EmailEdge, Email
 ### Document designs
 ###
         
-    
 class MaildirEmail(Email):
     """Maps the structure generated from Python's email module into a document
     by extending `Email`.
@@ -38,8 +37,6 @@ class MaildirEmail(Email):
         return cls(**contents)
 
     
-
-    
 class LuceneEmail(Email):
     """Maps the structure generated from Python's email module into a document
     by extending `Email`.
@@ -60,4 +57,3 @@ class LuceneEmail(Email):
     length = StringField()
     contents = StringField()
     contents_lines = StringField()
-
