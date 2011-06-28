@@ -72,20 +72,25 @@ arbredeactivate() {
 ### Constructs the necessary and generic components of an Arbre app
 arbremkapp() {
     typeset app_name="$1"
-    echo $app_name
     typeset app_dir="$ARBRE_APP_PATH/$app_name/arbreapp/$app_name"
-    echo $app_dir
 
     if [ "$app_name" = "" ]
     then
         echo "Pass <name> argument to name app"
     else
+        echo "Creating \`$app_name\` app in $ARBRE_APP_PATH"
+
         # Instantiate the necessary directory path
         \mkdir -p "$app_dir"
 
         # Copy the namespace sharing __init__
         # http://docs.python.org/library/pkgutil.html#pkgutil.extend_path
-        \cp "$ARBRE_ENV_PATH/skel/appfiles/__init__.py" "$ARBRE_DIR/arbreapp/$app_name/"
+        \cp "$ARBRE_ENV_PATH/skel/arbreapp/__init__.py" "$ARBRE_DIR/arbreapp/$app_name/"
+
+        # Copy the app template files into place
+        \cp -R "$ARBRE_ENV_PATH/skel/appfiles/"* "$app_dir" # Weird... "String"*
+        \mv "$app_dir/appfile.py" "$app_dir/$app_name.py"
+        
 
         # Touch the other necessary __init__'s
         \touch "$ARBRE_DIR/arbreapp/$app_name/__init__.py"
