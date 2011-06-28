@@ -24,28 +24,22 @@ arbre () {
 ### Shortcut for cd'ing to app path. Lists apps if no argument is given
 arbreapp () {
     typeset app_name="$1"
-    typeset app_path="$ARBRE_DIR/arbreapp/$app_name/arbreapp/$app_name"
+    #typeset app_path="$ARBRE_DIR/arbreapp/$app_name/arbreapp/$app_name"
+    typeset app_path="$ARBRE_DIR/arbreapp/$app_name"
 
     if [ "$app_name" = "" ]
     then
-        \ls -l "$ARBRE_DIR/arbreapp" | \grep "^d" | \cut -d " " -f 12
+        \ls -l "$ARBRE_DIR/arbreapp" | \grep "^d" | cut -d":" -f 2 | cut -d" " -f 2
     elif [ -d "$app_path" ]
     then
         \cd $app_path
     fi
 }    
 
-### Updates PYTHONPATH to include any directories in $ARBRE_APP_PATH
+### Updates PYTHONPATH
 arbresetapppaths() {
     PYTHONPATH=$PREV_PYTHONPATH
-    for app in `\ls -l "$ARBRE_APP_PATH" | \grep "^d" | \cut -d " " -f 12`
-    do
-        if [ "$app" != "" ]
-        then
-            PYTHONPATH="$ARBRE_APP_PATH/$app:$PYTHONPATH"
-        fi
-    done
-    export PYTHONPATH
+    export PYTHONPATH=".:$PYTHONPATH"
 }
 
 ### Initializes the environment for Arbre
@@ -75,7 +69,7 @@ arbredeactivate() {
 ### Constructs the necessary and generic components of an Arbre app
 arbremkapp() {
     typeset app_name="$1"
-    typeset app_dir="$ARBRE_APP_PATH/$app_name/arbreapp/$app_name"
+    typeset app_dir="$ARBRE_APP_PATH/$app_name"
 
     if [ "$app_name" = "" ]
     then
@@ -86,19 +80,9 @@ arbremkapp() {
         # Instantiate the necessary directory path
         \mkdir -p "$app_dir"
 
-        # Copy the namespace sharing __init__
-        # http://docs.python.org/library/pkgutil.html#pkgutil.extend_path
-        \cp "$ARBRE_ENV_PATH/skel/arbreapp/__init__.py" "$ARBRE_DIR/arbreapp/$app_name/"
-
         # Copy the app template files into place
-        \cp -R "$ARBRE_ENV_PATH/skel/appfiles/"* "$app_dir" # Weird... "String"*
-        \mv "$app_dir/appfile.py" "$app_dir/$app_name.py"
-        
-
-        # Touch the other necessary __init__'s
-        \touch "$ARBRE_DIR/arbreapp/$app_name/__init__.py"
-        \touch "$ARBRE_DIR/arbreapp/$app_name/arbreapp/__init__.py"
-        \touch "$ARBRE_DIR/arbreapp/$app_name/arbreapp/$app_name/__init__.py"
+        \cp -R "$ARBRE_ENV_PATH/skel/app/"* "$app_dir" # Weird... "String"*
+        \mv "$app_dir/app.py" "$app_dir/$app_name.py"
     fi
 }
 
