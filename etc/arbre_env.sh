@@ -38,9 +38,12 @@ arbreapp () {
 ### Updates PYTHONPATH to include any directories in $ARBRE_APP_PATH
 arbresetapppaths() {
     PYTHONPATH=$PREV_PYTHONPATH
-    for app in `\ls -l "$ARBRE_APP_PATH" | \grep "^d" | \cut -d " " -f 12`:
+    for app in `\ls -l "$ARBRE_APP_PATH" | \grep "^d" | \cut -d " " -f 12`
     do
-        PYTHONPATH="$ARBRE_APP_PATH/$app:$PYTHONPATH"
+        if [ "$app" != "" ]
+        then
+            PYTHONPATH="$ARBRE_APP_PATH/$app:$PYTHONPATH"
+        fi
     done
     export PYTHONPATH
 }
